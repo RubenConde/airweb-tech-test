@@ -1,29 +1,16 @@
-import { Roles } from 'src/config/constants/roles.constant';
-import { Entity, Column, PrimaryGeneratedColumn, BeforeUpdate } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity({ name: 'users' })
 export class User {
-   @PrimaryGeneratedColumn('uuid')
+   @PrimaryGeneratedColumn()
    id: string;
 
    @Column({ unique: true })
    email: string;
 
-   @Column({ name: 'first_name' })
-   firstName: string;
-
-   @Column({ name: 'last_name' })
-   lastName: string;
-
    @Column()
+   name: string;
+
+   @Column({ name: 'password_hash' })
    password: string;
-
-   @Column({ enum: Object.values(Roles), default: Roles.CREATOR })
-   role: string;
-
-   @Column({ name: 'created_at', default: () => new Date().getTime() })
-   createdAt: number;
-
-   @Column({ name: 'updated_at', default: () => new Date().getTime() })
-   updatedAt: number;
 }

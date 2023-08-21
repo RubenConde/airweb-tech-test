@@ -7,31 +7,13 @@ const baseUserInfo = {
       format: 'uuid',
       type: 'string',
    },
-   createdAt: {
-      description: 'Creation date',
-      format: 'date-time',
-      type: 'string',
-   },
    email: {
       description: "User's email",
       format: 'email',
       type: 'string',
    },
-   firstName: {
-      description: "User's first name",
-      type: 'string',
-   },
-   lastName: {
-      description: "User's last name",
-      type: 'string',
-   },
-   role: {
-      description: 'Defined role for permissions',
-      type: 'string',
-   },
-   updatedAt: {
-      description: 'Modification date',
-      format: 'date-time',
+   name: {
+      description: "User's name",
       type: 'string',
    },
 };
