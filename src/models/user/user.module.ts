@@ -6,11 +6,10 @@ import { LocalStrategy } from 'src/config/strategies/local.strategy';
 import { User } from 'src/models/user/entity/user.entity';
 import { UserController } from 'src/models/user/user.controller';
 import { UserService } from 'src/models/user/user.service';
-import { UserSubscriber } from 'src/models/user/user.subscriber';
 
 @Module({
    controllers: [UserController],
-   providers: [UserService, JwtStrategy, LocalStrategy, UserSubscriber],
+   providers: [UserService, JwtStrategy, LocalStrategy],
    exports: [UserService],
    imports: [
       JwtModule.registerAsync({

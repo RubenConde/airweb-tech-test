@@ -22,13 +22,10 @@ import {
    ApiTags,
    ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Roles } from 'src/config/constants/roles.constant';
-import { EnabledRoles } from 'src/config/decorators/roles.decorator';
 import { RequestParamsDTO } from 'src/config/dto/request-params.dto';
 import { JwtAuthGuard } from 'src/config/guards/jwt-auth.guard';
 import { LocalAuthGuard } from 'src/config/guards/local-auth.guard';
 import { OptionalJwtAuthGuard } from 'src/config/guards/optional-jwt.guard';
-import { RolesGuard } from 'src/config/guards/role.guard';
 import { SwaggerErrorDescriptions } from 'src/config/swagger/error.descriptions.swagger';
 import { swaggerErrorResponse } from 'src/config/swagger/error.response.swagger';
 import { SwaggerSuccessDescriptions } from 'src/config/swagger/success.descriptions.swagger';
@@ -55,8 +52,7 @@ export class UserController {
    constructor(private readonly service: UserService) {}
 
    @Get()
-   @UseGuards(JwtAuthGuard, RolesGuard)
-   @EnabledRoles(Roles.ADMIN)
+   @UseGuards(JwtAuthGuard)
    @ApiBearerAuth()
    @ApiOkResponse(successUserCollectionResponse)
    async index() {
@@ -65,8 +61,7 @@ export class UserController {
    }
 
    @Get(':id')
-   @UseGuards(JwtAuthGuard, RolesGuard)
-   @EnabledRoles(Roles.ADMIN)
+   @UseGuards(JwtAuthGuard)
    @ApiBearerAuth()
    @ApiOkResponse(successUserResourceResponse)
    @ApiNotFoundResponse({
@@ -93,9 +88,8 @@ export class UserController {
    }
 
    @Put(':id')
-   @UseGuards(JwtAuthGuard, RolesGuard)
+   @UseGuards(JwtAuthGuard)
    @HttpCode(HttpStatus.NO_CONTENT)
-   @EnabledRoles(Roles.ADMIN)
    @ApiBearerAuth()
    @ApiNoContentResponse({ description: SwaggerSuccessDescriptions.NoContent })
    @ApiBadRequestResponse({
@@ -113,8 +107,7 @@ export class UserController {
    }
 
    @Delete(':id')
-   @UseGuards(JwtAuthGuard, RolesGuard)
-   @EnabledRoles(Roles.ADMIN)
+   @UseGuards(JwtAuthGuard)
    @HttpCode(HttpStatus.NO_CONTENT)
    @ApiBearerAuth()
    @ApiNoContentResponse({ description: SwaggerSuccessDescriptions.NoContent })
