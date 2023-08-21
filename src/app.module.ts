@@ -10,6 +10,7 @@ import { UserModule } from 'src/models/user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { sqliteConfig } from 'src/config/database/sqlite.config';
 import { CategoryModule } from 'src/models/category/category.module';
+import { ProductModule } from 'src/models/product/product.module';
 
 @Module({
    controllers: [AppController],
@@ -20,6 +21,7 @@ import { CategoryModule } from 'src/models/category/category.module';
       ThrottlerModule.forRoot(throttlerConfig),
       UserModule,
       CategoryModule,
+      ProductModule,
    ],
    exports: [TypeOrmModule],
 })
