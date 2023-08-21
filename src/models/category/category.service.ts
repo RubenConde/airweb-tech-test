@@ -17,7 +17,7 @@ export class CategoryService implements BaseCategoryService {
       return categoryList;
    }
 
-   async show(categoryId: string) {
+   async show(categoryId: number) {
       const category = await this.CategoryRepo.findOneBy({ id: categoryId }).then(
          (foundCategory) => {
             if (foundCategory === null) throw new NotFoundException(`${Category.name} not found`);
@@ -43,7 +43,7 @@ export class CategoryService implements BaseCategoryService {
       return category;
    }
 
-   async update(categoryId: string, categoryData: UpdateCategoryDTO) {
+   async update(categoryId: number, categoryData: UpdateCategoryDTO) {
       await this.show(categoryId);
 
       const category = await this.CategoryRepo.findOneBy({ id: categoryId });
@@ -51,7 +51,7 @@ export class CategoryService implements BaseCategoryService {
       await this.CategoryRepo.save({ id: categoryId, ...category, ...categoryData });
    }
 
-   async delete(categoryId: string) {
+   async delete(categoryId: number) {
       await this.show(categoryId);
 
       await this.CategoryRepo.delete(categoryId);

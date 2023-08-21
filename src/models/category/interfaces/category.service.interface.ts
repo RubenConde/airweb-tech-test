@@ -17,7 +17,7 @@ export interface BaseCategoryService {
     * @param {string} categoryId Identifier of the category to search
     * @returns {Promise<Category>} Information of the category
     */
-   show(categoryId: string): Promise<CategoryFiltered>;
+   show(categoryId: number): Promise<CategoryFiltered>;
 
    /**
     * Stores a new category in the database.
@@ -50,7 +50,7 @@ export interface BaseCategoryService {
     * @returns {Promise<Category | null>} Updated information of the category
     */
    update(
-      categoryId: string,
+      categoryId: number,
       categoryData: UpdateCategoryDTO,
       requestCategory: Category,
    ): Promise<void>;
@@ -62,5 +62,5 @@ export interface BaseCategoryService {
     *
     * @returns {Promise<Category | null>} Information of the deleted category
     */
-   delete(categoryId: string): Promise<void>;
+   delete(categoryId: number): Promise<void>;
 }

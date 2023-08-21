@@ -1,7 +1,7 @@
 interface JWTPayload {
    [key: string]: string | number;
    email: string;
-   userId: string;
+   userId: number;
    iat: number;
    exp: number;
 }

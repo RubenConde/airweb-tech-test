@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsInt, IsNumberString } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumberString } from 'class-validator';
 
 export class RequestParamsDTO {
    @IsString()
@@ -9,5 +9,5 @@ export class RequestParamsDTO {
       description: 'Item ID',
       type: 'string',
    })
-   id: string;
+   id: number;
 }

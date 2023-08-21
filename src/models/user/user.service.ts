@@ -25,7 +25,7 @@ export class UserService implements BaseUserService {
       return userList;
    }
 
-   async show(userId: string) {
+   async show(userId: number) {
       const user = await this.UserRepo.findOneBy({ id: userId }).then((foundUser) => {
          if (foundUser === null) throw new NotFoundException(`${User.name} not found`);
          const { password, id, ...filteredUser } = foundUser;
@@ -60,7 +60,7 @@ export class UserService implements BaseUserService {
       return user;
    }
 
-   async update(userId: string, userData: UpdateUserDTO, requestUser: User | null) {
+   async update(userId: number, userData: UpdateUserDTO, requestUser: User | null) {
       await this.show(userId);
 
       const user = await this.UserRepo.findOneBy({ id: userId });
@@ -68,7 +68,7 @@ export class UserService implements BaseUserService {
       await this.UserRepo.save({ id: userId, ...user, ...userData });
    }
 
-   async delete(userId: string) {
+   async delete(userId: number) {
       await this.show(userId);
 
       await this.UserRepo.delete(userId);

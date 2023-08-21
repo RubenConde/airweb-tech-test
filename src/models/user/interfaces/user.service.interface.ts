@@ -18,7 +18,7 @@ export interface BaseUserService {
     * @param {string} userId Identifier of the user to search
     * @returns {Promise<User>} Information of the user
     */
-   show(userId: string): Promise<UserFiltered>;
+   show(userId: number): Promise<UserFiltered>;
 
    /**
     * Stores a new user in the database.
@@ -47,7 +47,7 @@ export interface BaseUserService {
     *
     * @returns {Promise<User | null>} Updated information of the user
     */
-   update(userId: string, userData: UpdateUserDTO, requestUser: User): Promise<void>;
+   update(userId: number, userData: UpdateUserDTO, requestUser: User): Promise<void>;
 
    /**
     * Deletes the user from the database.
@@ -56,7 +56,7 @@ export interface BaseUserService {
     *
     * @returns {Promise<User | null>} Information of the deleted user
     */
-   delete(userId: string): Promise<void>;
+   delete(userId: number): Promise<void>;
 
    /**
     * Generates a JWT token based in the user information, so the user can use it to perform actions

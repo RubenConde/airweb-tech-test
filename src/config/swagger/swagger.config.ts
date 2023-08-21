@@ -2,8 +2,6 @@ import { DocumentBuilder, SwaggerCustomOptions, SwaggerDocumentOptions } from '@
 
 const swaggerConfiguration = new DocumentBuilder()
    .addBearerAuth({ scheme: 'bearer', type: 'http' })
-   .addTag('Users')
-   .addTag('Categories')
    .setContact('Contact', String(process.env.SITE_URL), String(process.env.CONTACT_EMAIL))
    .setDescription(`API REST for ${process.env.API_NAME}`)
    .setTitle(String(process.env.API_NAME))
