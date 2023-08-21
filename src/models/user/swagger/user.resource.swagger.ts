@@ -2,7 +2,7 @@ import type { ApiResponseOptions } from '@nestjs/swagger/dist/decorators/api-res
 import type { SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
 const baseUserInfo = {
-   _id: {
+   id: {
       description: "User's ID",
       format: 'uuid',
       type: 'string',
