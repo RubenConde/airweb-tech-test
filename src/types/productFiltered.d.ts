@@ -5,7 +5,5 @@ interface ProductFiltered {
 
    price: number;
 
-   categoryId: number;
-
    thumbnailUrl: string;
 }

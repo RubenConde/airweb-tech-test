@@ -47,22 +47,25 @@ export class ProductController {
    constructor(private readonly service: ProductService) {}
 
    @Get()
+   @UseGuards(OptionalJwtAuthGuard)
+   @ApiBearerAuth()
    @ApiOkResponse(successProductCollectionResponse)
-   async index() {
-      const productList = await this.service.index();
+   async index(@Request() request) {
+      const productList = await this.service.index(request.user);
       return productList;
    }
 
    @Get(':id')
    @UseGuards(OptionalJwtAuthGuard)
+   @ApiBearerAuth()
    @ApiOkResponse(successProductResourceResponse)
    @ApiNotFoundResponse({
       description: SwaggerErrorDescriptions.NotFound,
       schema: swaggerErrorResponse,
    })
-   async show(@Param() params: RequestParamsDTO) {
+   async show(@Param() params: RequestParamsDTO, @Request() request) {
       const { id } = params;
-      const product = await this.service.show(id);
+      const product = await this.service.show(id, request.user);
       return product;
    }
 

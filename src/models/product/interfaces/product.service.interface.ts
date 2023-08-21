@@ -1,13 +1,15 @@
 import { CreateProductDTO, UpdateProductDTO } from 'src/models/product/dto/product.dto';
 import { Product } from 'src/models/product/entity/product.entity';
+import { User } from 'src/models/user/entity/user.entity';
 
 export interface BaseProductService {
    /**
     * Gets all the products from the database.
     *
+    * @param {User} requestUser User trying to update the information of the product
     * @returns {Promise<Product[]>} List of products
     */
-   index(): Promise<Product[]>;
+   index(requestUser: User | null): Promise<Product[]>;
 
    /**
     * Gets the information from a specific product in the database.
@@ -15,9 +17,10 @@ export interface BaseProductService {
     * It throws a `NotFoundException` if no product was found.
     *
     * @param {string} productId Identifier of the product to search
+    * @param {User} requestUser User trying to update the information of the product
     * @returns {Promise<Product>} Information of the product
     */
-   show(productId: number): Promise<ProductFiltered>;
+   show(productId: number, requestUser: User | null): Promise<ProductFiltered>;
 
    /**
     * Stores a new product in the database.
@@ -27,7 +30,7 @@ export interface BaseProductService {
     *
     * It throws a `ConflictException` if the email of the new product was found in the database.
     *
-    * @param {UrlDTO} productData Information to store in the product
+    * @param {CreateProductDTO} productData Information to store in the product
     * @param {Product | null} requestProduct Possible product trying to save a new product
     *
     * @returns {Promise<Product>} Information of the new product
@@ -41,8 +44,7 @@ export interface BaseProductService {
     * trying to modify it has no the `admin` role.
     *
     * @param {string} productId Identifier of the product to update
-    * @param {UrlDTO} productData Information to update in the product
-    * @param {Product} requestProduct Product trying to update the information of the product
+    * @param {UpdateProductDTO} productData Information to update in the product
     *
     * @returns {Promise<Product | null>} Updated information of the product
     */
