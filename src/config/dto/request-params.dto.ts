@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID, IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsInt, IsNumberString } from 'class-validator';
 
 export class RequestParamsDTO {
    @IsString()
    @IsNotEmpty()
-   @IsUUID()
+   @IsNumberString()
    @ApiProperty({
       description: 'Item ID',
       type: 'string',
