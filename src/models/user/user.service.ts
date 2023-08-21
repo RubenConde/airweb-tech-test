@@ -1,27 +1,23 @@
 import {
    ConflictException,
-   ForbiddenException,
    Injectable,
    NotFoundException,
    UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { compare, hash } from 'bcryptjs';
-import { Roles } from 'src/config/constants/roles.constant';
 import { CreateUserDTO, UpdateUserDTO } from 'src/models/user/dto/user.dto';
 import { BaseUserService } from 'src/models/user/interfaces/user.service.interface';
 import { User } from 'src/models/user/entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { createHash } from 'crypto';
 
 @Injectable()
 export class UserService implements BaseUserService {
    constructor(
       @InjectRepository(User) private UserRepo: Repository<User>,
       private jwtService: JwtService,
-   ) {
-      this.insertDefaultUser();
-   }
+   ) {}
 
    async index() {
       const userList = await this.UserRepo.find();
@@ -40,37 +36,31 @@ export class UserService implements BaseUserService {
    }
 
    async store(userData: CreateUserDTO, requestUser: User | null) {
-      const isRequestUserAdmin = requestUser?.role === Roles.ADMIN;
-      const isNewUserAdmin = userData.role === Roles.ADMIN;
-
-      if (!isRequestUserAdmin && isNewUserAdmin) throw new ForbiddenException('Forbidden resource');
-
       const isAlreadyCreated = await this.UserRepo.findOneBy({ email: userData.email });
 
       if (isAlreadyCreated) throw new ConflictException('User already exists');
 
       const { password, ...userInfo } = userData;
 
-      const saltValue = 10;
-      const hashedPassword = await hash(password, saltValue);
-
       const newUser = await this.UserRepo.save({
          ...userInfo,
-         password: hashedPassword,
+         password,
       });
 
+      const hashedPassword = await createHash('md5')
+         .update(`${newUser.id}${password}`)
+         .digest('hex');
+
+      await this.UserRepo.save({
+         ...newUser,
+         password: hashedPassword,
+      });
       const user = await this.show(newUser.id);
 
       return user;
    }
 
    async update(userId: string, userData: UpdateUserDTO, requestUser: User | null) {
-      const isRequestUserAdmin = requestUser?.role === Roles.ADMIN;
-      const isModifyingRole = !!userData.role;
-
-      if (!isRequestUserAdmin && isModifyingRole)
-         throw new ForbiddenException('Forbidden resource');
-
       await this.show(userId);
 
       const user = await this.UserRepo.findOneBy({ id: userId });
@@ -103,31 +93,12 @@ export class UserService implements BaseUserService {
 
       if (!user) throw new NotFoundException(`${User.name} not found`);
 
-      const isValidPassword = await compare(password, user.password);
+      const md5Hash = createHash('md5').update(`${user.id}${password}`).digest('hex');
+
+      const isValidPassword = md5Hash === user.password;
 
       if (!isValidPassword) throw new UnauthorizedException();
 
       return user;
-   }
-
-   private async insertDefaultUser() {
-      const user: CreateUserDTO = {
-         email: 'admin@example.com',
-         firstName: 'Admin',
-         lastName: 'User',
-         password: String(process.env.DEFAULT_USER_PASSWORD),
-         role: 'admin',
-      };
-      const foundUser = await this.UserRepo.findOneBy({ email: user.email });
-
-      if (foundUser === null) {
-         const { password, ...userInfo } = user;
-         const saltValue = 10;
-         const hashedPassword = await hash(password, saltValue);
-         await this.UserRepo.insert({
-            ...userInfo,
-            password: hashedPassword,
-         });
-      }
    }
 }
