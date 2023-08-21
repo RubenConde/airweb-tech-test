@@ -12,7 +12,7 @@ export class CategoryService implements BaseCategoryService {
    constructor(@InjectRepository(Category) private CategoryRepo: Repository<Category>) {}
 
    async index() {
-      const categoryList = await this.CategoryRepo.find();
+      const categoryList = await this.CategoryRepo.find({ relations: { products: true } });
 
       return categoryList;
    }

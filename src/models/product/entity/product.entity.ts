@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Category } from 'src/models/category/entity/category.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinTable, JoinColumn } from 'typeorm';
 
 @Entity({ name: 'products' })
 export class Product {
@@ -25,4 +26,8 @@ export class Product {
 
    @Column({ name: 'visible_authenticated' })
    visibleAuthenticated: boolean;
+
+   @ManyToOne(() => Category, (category) => category.products)
+   @JoinColumn({ name: 'category_id' })
+   category: Category;
 }

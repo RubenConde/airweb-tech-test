@@ -11,7 +11,7 @@ export class ProductService implements BaseProductService {
    constructor(@InjectRepository(Product) private ProductRepo: Repository<Product>) {}
 
    async index() {
-      const productList = await this.ProductRepo.find();
+      const productList = await this.ProductRepo.find({ relations: { category: true } });
 
       return productList;
    }
@@ -19,7 +19,6 @@ export class ProductService implements BaseProductService {
    async show(productId: number) {
       const product = await this.ProductRepo.findOneBy({ id: productId }).then((foundProduct) => {
          if (foundProduct === null) throw new NotFoundException(`${Product.name} not found`);
-         console.log(foundProduct);
          const { id, visibleAuthenticated, visiblePublic, ...filteredProduct } = foundProduct;
          return filteredProduct;
       });

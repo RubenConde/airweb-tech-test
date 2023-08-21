@@ -1,6 +1,8 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Product } from 'src/models/product/entity/product.entity';
+import { OneToMany } from 'typeorm';
 
 export class CreateCategoryDTO {
    @IsNotEmpty()
@@ -20,7 +22,7 @@ export class CreateCategoryDTO {
    description: string;
 
    @IsNotEmpty()
-   @IsNumber()
+   @IsInt()
    @ApiProperty({
       type: 'number',
       description: 'Index of the product',
