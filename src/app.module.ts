@@ -11,6 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { sqliteConfig } from 'src/config/database/sqlite.config';
 import { CategoryModule } from 'src/models/category/category.module';
 import { ProductModule } from 'src/models/product/product.module';
+import { CartModule } from 'src/models/cart/cart.module';
 
 @Module({
    controllers: [AppController],
@@ -22,6 +23,7 @@ import { ProductModule } from 'src/models/product/product.module';
       UserModule,
       CategoryModule,
       ProductModule,
+      CartModule,
    ],
    exports: [TypeOrmModule],
 })

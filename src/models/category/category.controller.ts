@@ -23,18 +23,13 @@ import {
 } from '@nestjs/swagger';
 import { RequestParamsDTO } from 'src/config/dto/request-params.dto';
 import { JwtAuthGuard } from 'src/config/guards/jwt-auth.guard';
-
 import { SwaggerErrorDescriptions } from 'src/config/swagger/error.descriptions.swagger';
 import { swaggerErrorResponse } from 'src/config/swagger/error.response.swagger';
 import { SwaggerSuccessDescriptions } from 'src/config/swagger/success.descriptions.swagger';
-import { CreateCategoryDTO, UpdateCategoryDTO } from 'src/models/category/dto/category.dto';
-import { Category } from 'src/models/category/entity/category.entity';
-import { successCategoryCollectionResponse } from 'src/models/category/swagger/category.collection.swagger';
-import {
-   successCategoryJWTResourceResponse,
-   successCategoryResourceResponse,
-} from 'src/models/category/swagger/category.resource.swagger';
 import { CategoryService } from 'src/models/category/category.service';
+import { CreateCategoryDTO, UpdateCategoryDTO } from 'src/models/category/dto/category.dto';
+import { successCategoryCollectionResponse } from 'src/models/category/swagger/category.collection.swagger';
+import { successCategoryResourceResponse } from 'src/models/category/swagger/category.resource.swagger';
 
 @Controller('categories')
 @ApiTags('Categories')
