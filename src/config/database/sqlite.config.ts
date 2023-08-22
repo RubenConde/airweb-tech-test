@@ -7,7 +7,7 @@ export const sqliteConfig: TypeOrmModuleAsyncOptions = {
    useFactory: () => ({
       type: 'sqlite',
       database: String(process.env.DATABASE_NAME),
-      entities: [User, Category, Product],
+      entities: [User, Category, Product, Cart, ProductToCart],
       synchronize: process.env.NODE_ENV === 'development',
    }),
 };
