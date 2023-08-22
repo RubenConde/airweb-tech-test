@@ -14,3 +14,17 @@ In order to run this test you need to:
    ```
 
 3. Now you can access the application from the port defined in the environment file. A swagger interactive documentation is available at: <http://localhost:PORT/docs>
+
+It is also possible to run the API from the Dockerfile in the root of the project. To do it you should
+
+1. Build a docker image from the Docker file with
+
+  ```bash
+  docker build -t airweb_test_img .
+  ```
+
+2. Run a docker container from this image with:
+
+  ```bash
+    docker run -d -p DESIRED_LOCAL_PORT:PORT_IN_PRODUCTION_ENVIRONMENT --restart always --env-file .env.production --name airweb_test airweb_test_img
+  ```

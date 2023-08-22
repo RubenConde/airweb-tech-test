@@ -1,9 +1,6 @@
 # Lightest nodejs docker image
 FROM node:lts
 
-# API production port
-EXPOSE 3000
-
 # Non-root user for security purposes.
 #
 # UIDs below 10,000 are a security risk, as a container breakout could result
