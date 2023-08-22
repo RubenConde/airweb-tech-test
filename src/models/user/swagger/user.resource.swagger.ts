@@ -4,8 +4,7 @@ import type { SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec
 const baseUserInfo = {
    id: {
       description: "User's ID",
-      format: 'uuid',
-      type: 'string',
+      type: 'integer',
    },
    email: {
       description: "User's email",

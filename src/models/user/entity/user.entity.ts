@@ -1,5 +1,5 @@
 import { Cart } from 'src/models/cart/entity/cart.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, DeleteDateColumn } from 'typeorm';
 
 @Entity({ name: 'users' })
 export class User {
@@ -11,6 +11,9 @@ export class User {
 
    @Column()
    name: string;
+
+   @DeleteDateColumn({ name: 'deleted_at' })
+   deletedAt: Date;
 
    @Column({ name: 'password_hash' })
    password: string;

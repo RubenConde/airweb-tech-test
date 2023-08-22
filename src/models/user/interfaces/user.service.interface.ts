@@ -13,12 +13,12 @@ export interface BaseUserService {
    /**
     * Gets the information from a specific user in the database.
     *
-    * It throws a `NotFoundException` if no user was found.
+    * It will throw a NotFoundException if no user is found.
     *
     * @param {string} userId Identifier of the user to search
     * @returns {Promise<User>} Information of the user
     */
-   show(userId: number): Promise<UserFiltered>;
+   show(userId: number): Promise<User>;
 
    /**
     * Stores a new user in the database.
@@ -26,35 +26,35 @@ export interface BaseUserService {
     * It throws a `UnauthorizedException` if the role of the new user is `admin` and the role from
     * the user performing the action is not.
     *
-    * It throws a `ConflictException` if the email of the new user was found in the database.
+    * It throws a `ConflictException` if the email of the new user is found in the database.
     *
-    * @param {UrlDTO} userData Information to store in the user
+    * @param {CreateUserDTO} userData Information to store in the user
     * @param {User | null} requestUser Possible user trying to save a new user
     *
     * @returns {Promise<User>} Information of the new user
     */
-   store(userData: CreateUserDTO, requestUser: User | null): Promise<UserFiltered>;
+   store(userData: CreateUserDTO, requestUser: User | null): Promise<User>;
 
    /**
     * Updates the information from an user in the database.
     *
-    * It throws a `UnauthorizedException` if the role of the user to modify has changed and the user
-    * trying to modify it has no the `admin` role.
+    * It throws a `ForbiddenException` if the user who tries to modify the information
+    * does not have the admin role or if it tries to modify a user other than itself.
     *
-    * @param {string} userId Identifier of the user to update
-    * @param {UrlDTO} userData Information to update in the user
-    * @param {User} requestUser User trying to update the information of the user
+    * @param {number} userId Identifier of the user to update
+    * @param {UpdateUserDTO} userData Information to update in the user
+    * @param {User | null} requestUser User trying to update the information of the user
     *
-    * @returns {Promise<User | null>} Updated information of the user
+    * @returns {Promise<void>} Updated information of the user
     */
    update(userId: number, userData: UpdateUserDTO, requestUser: User): Promise<void>;
 
    /**
     * Deletes the user from the database.
     *
-    * @param {string} userId Identifier of the user to delete
+    * @param {number} userId Identifier of the user to delete
     *
-    * @returns {Promise<User | null>} Information of the deleted user
+    * @returns {Promise<void>} Information of the deleted user
     */
    delete(userId: number): Promise<void>;
 

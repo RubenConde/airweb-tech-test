@@ -1,5 +1,6 @@
 import {
    ConflictException,
+   ForbiddenException,
    Injectable,
    NotFoundException,
    UnauthorizedException,
@@ -20,41 +21,56 @@ export class UserService implements BaseUserService {
    ) {}
 
    async index() {
-      const userList = await this.UserRepo.find();
+      const userList = await this.UserRepo.find({
+         select: {
+            email: true,
+            id: true,
+            name: true,
+            password: false,
+         },
+         relations: { carts: false },
+      });
 
       return userList;
    }
 
    async show(userId: number) {
-      const user = await this.UserRepo.findOneBy({ id: userId }).then((foundUser) => {
-         if (foundUser === null) throw new NotFoundException(`${User.name} not found`);
-         const { password, id, ...filteredUser } = foundUser;
-         return filteredUser;
+      const userFound = await this.UserRepo.findOne({
+         where: { id: userId },
+         select: {
+            email: true,
+            id: true,
+            name: true,
+            password: false,
+         },
+         relations: { carts: false },
       });
+      if (userFound === null) throw new NotFoundException(`${User.name} not found.`);
 
-      return user;
+      return userFound;
    }
 
    async store(userData: CreateUserDTO, requestUser: User | null) {
-      const isAlreadyCreated = await this.UserRepo.findOneBy({ email: userData.email });
+      const userFound = await this.UserRepo.findOne({
+         where: { email: userData.email },
+         withDeleted: true,
+      });
+      if (userFound) throw new ConflictException('There is already a user with this email.');
 
-      if (isAlreadyCreated) throw new ConflictException('User already exists');
+      const lastUser = await this.UserRepo.find({ order: { id: 'DESC' }, withDeleted: true });
+
+      const newId = lastUser.length > 0 ? lastUser[0].id + 1 : 1;
 
       const { password, ...userInfo } = userData;
 
+      const hashedPassword = createHash('md5').update(`${newId}${password}`).digest('hex');
+
       const newUser = await this.UserRepo.save({
          ...userInfo,
-         password,
-      });
-
-      const hashedPassword = await createHash('md5')
-         .update(`${newUser.id}${password}`)
-         .digest('hex');
-
-      await this.UserRepo.save({
-         ...newUser,
+         id: newId,
          password: hashedPassword,
       });
+
       const user = await this.show(newUser.id);
 
       return user;
@@ -63,15 +79,29 @@ export class UserService implements BaseUserService {
    async update(userId: number, userData: UpdateUserDTO, requestUser: User | null) {
       await this.show(userId);
 
+      if (requestUser?.id !== Number(userId))
+         throw new ForbiddenException("You can't modify this user.");
+
+      let newPossiblePassword: string | undefined;
+
+      if (userData.password) {
+         newPossiblePassword = createHash('md5')
+            .update(`${userId}${userData.password}`)
+            .digest('hex');
+      }
       const user = await this.UserRepo.findOneBy({ id: userId });
 
-      await this.UserRepo.save({ id: userId, ...user, ...userData });
+      await this.UserRepo.save({
+         ...user,
+         ...userData,
+         password: newPossiblePassword ?? user?.password,
+      });
    }
 
    async delete(userId: number) {
       await this.show(userId);
 
-      await this.UserRepo.delete(userId);
+      await this.UserRepo.softDelete(userId);
    }
 
    async signIn(userData: User) {

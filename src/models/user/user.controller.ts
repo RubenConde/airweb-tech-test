@@ -40,6 +40,7 @@ import { UserService } from 'src/models/user/user.service';
 
 @Controller('users')
 @ApiTags('Users')
+@ApiBearerAuth()
 @ApiUnauthorizedResponse({
    description: SwaggerErrorDescriptions.Unauthorized,
    schema: swaggerErrorResponse,
@@ -53,7 +54,6 @@ export class UserController {
 
    @Get()
    @UseGuards(JwtAuthGuard)
-   @ApiBearerAuth()
    @ApiOkResponse(successUserCollectionResponse)
    async index() {
       const userList = await this.service.index();
@@ -62,7 +62,6 @@ export class UserController {
 
    @Get(':id')
    @UseGuards(JwtAuthGuard)
-   @ApiBearerAuth()
    @ApiOkResponse(successUserResourceResponse)
    @ApiNotFoundResponse({
       description: SwaggerErrorDescriptions.NotFound,
@@ -90,7 +89,6 @@ export class UserController {
    @Put(':id')
    @UseGuards(JwtAuthGuard)
    @HttpCode(HttpStatus.NO_CONTENT)
-   @ApiBearerAuth()
    @ApiNoContentResponse({ description: SwaggerSuccessDescriptions.NoContent })
    @ApiBadRequestResponse({
       description: SwaggerErrorDescriptions.BadRequest,
@@ -109,7 +107,6 @@ export class UserController {
    @Delete(':id')
    @UseGuards(JwtAuthGuard)
    @HttpCode(HttpStatus.NO_CONTENT)
-   @ApiBearerAuth()
    @ApiNoContentResponse({ description: SwaggerSuccessDescriptions.NoContent })
    async delete(@Param() params: RequestParamsDTO) {
       const { id } = params;
@@ -132,7 +129,6 @@ export class UserController {
 
    @Get('me')
    @UseGuards(JwtAuthGuard)
-   @ApiBearerAuth()
    @ApiOkResponse(successUserResourceResponse)
    @ApiForbiddenResponse()
    getMe(@Request() request) {
