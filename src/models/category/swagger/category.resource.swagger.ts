@@ -4,8 +4,7 @@ import type { SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec
 const baseCategoryInfo = {
    id: {
       description: "Category's ID",
-      format: 'uuid',
-      type: 'string',
+      type: 'integer',
    },
    label: {
       description: "Category's label",
@@ -27,24 +26,7 @@ export const successCategoryResourceSchema: SchemaObject = {
    type: 'object',
 };
 
-export const successCategoryJWTResourceSchema: SchemaObject = {
-   description: "Category's information",
-   properties: {
-      ...baseCategoryInfo,
-      accessToken: {
-         description: 'JWT token to perform actions',
-         type: 'string',
-      },
-   },
-   type: 'object',
-};
-
 export const successCategoryResourceResponse: ApiResponseOptions = {
    description: 'Successful resource data',
    schema: successCategoryResourceSchema,
-};
-
-export const successCategoryJWTResourceResponse: ApiResponseOptions = {
-   description: 'Successful resource data',
-   schema: successCategoryJWTResourceSchema,
 };

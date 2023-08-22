@@ -12,55 +12,41 @@ export interface BaseCategoryService {
    /**
     * Gets the information from a specific category in the database.
     *
-    * It throws a `NotFoundException` if no category was found.
+    * It throws a `NotFoundException` if no category is found.
     *
-    * @param {string} categoryId Identifier of the category to search
+    * @param {number} categoryId Identifier of the category to search
+    *
     * @returns {Promise<Category>} Information of the category
     */
-   show(categoryId: number): Promise<CategoryFiltered>;
+   show(categoryId: number): Promise<Category>;
 
    /**
     * Stores a new category in the database.
     *
-    * It throws a `UnauthorizedException` if the role of the new category is `admin` and the role from
-    * the category performing the action is not.
+    * It throws a `ConflictException` if the label of the new category is found in the database.
     *
-    * It throws a `ConflictException` if the email of the new category was found in the database.
-    *
-    * @param {UrlDTO} categoryData Information to store in the category
-    * @param {Category | null} requestCategory Possible category trying to save a new category
+    * @param {CreateCategoryDTO} categoryData Information to store in the category
     *
     * @returns {Promise<Category>} Information of the new category
     */
-   store(
-      categoryData: CreateCategoryDTO,
-      requestCategory: Category | null,
-   ): Promise<CategoryFiltered>;
+   store(categoryData: CreateCategoryDTO): Promise<Category>;
 
    /**
     * Updates the information from an category in the database.
     *
-    * It throws a `UnauthorizedException` if the role of the category to modify has changed and the category
-    * trying to modify it has no the `admin` role.
+    * @param {number} categoryId Identifier of the category to update
+    * @param {UpdateCategoryDTO} categoryData Information to update in the category
     *
-    * @param {string} categoryId Identifier of the category to update
-    * @param {UrlDTO} categoryData Information to update in the category
-    * @param {Category} requestCategory Category trying to update the information of the category
-    *
-    * @returns {Promise<Category | null>} Updated information of the category
+    * @returns {Promise<void>} Updated information of the category
     */
-   update(
-      categoryId: number,
-      categoryData: UpdateCategoryDTO,
-      requestCategory: Category,
-   ): Promise<void>;
+   update(categoryId: number, categoryData: UpdateCategoryDTO): Promise<void>;
 
    /**
     * Deletes the category from the database.
     *
-    * @param {string} categoryId Identifier of the category to delete
+    * @param {number} categoryId Identifier of the category to delete
     *
-    * @returns {Promise<Category | null>} Information of the deleted category
+    * @returns {Promise<void>} Information of the deleted category
     */
    delete(categoryId: number): Promise<void>;
 }

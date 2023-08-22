@@ -1,42 +1,65 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { CreateCategoryDTO, UpdateCategoryDTO } from 'src/models/category/dto/category.dto';
-import { BaseCategoryService } from 'src/models/category/interfaces/category.service.interface';
-import { Category } from 'src/models/category/entity/category.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateCategoryDTO, UpdateCategoryDTO } from 'src/models/category/dto/category.dto';
+import { Category } from 'src/models/category/entity/category.entity';
+import { BaseCategoryService } from 'src/models/category/interfaces/category.service.interface';
 import { Repository } from 'typeorm';
-import { createHash } from 'crypto';
 
 @Injectable()
 export class CategoryService implements BaseCategoryService {
    constructor(@InjectRepository(Category) private CategoryRepo: Repository<Category>) {}
 
    async index() {
-      const categoryList = await this.CategoryRepo.find({ relations: { products: true } });
+      const categoryList = await this.CategoryRepo.find({
+         relations: {
+            products: false,
+         },
+         select: {
+            deletedAt: false,
+            description: true,
+            id: true,
+            index: true,
+            label: true,
+         },
+      });
 
       return categoryList;
    }
 
    async show(categoryId: number) {
-      const category = await this.CategoryRepo.findOneBy({ id: categoryId }).then(
-         (foundCategory) => {
-            if (foundCategory === null) throw new NotFoundException(`${Category.name} not found`);
-            const { id, ...filteredCategory } = foundCategory;
-            return filteredCategory;
+      const categoryFound = await this.CategoryRepo.findOne({
+         relations: {
+            products: false,
          },
-      );
+         select: {
+            deletedAt: false,
+            description: true,
+            id: true,
+            index: true,
+            label: true,
+         },
+         where: {
+            id: categoryId,
+         },
+      });
 
-      return category;
+      if (categoryFound === null) throw new NotFoundException(`${Category.name} not found.`);
+
+      return categoryFound;
    }
 
    async store(categoryData: CreateCategoryDTO) {
-      const isAlreadyCreated = await this.CategoryRepo.findOneBy({ label: categoryData.label });
+      const categoryFound = await this.CategoryRepo.findOne({
+         where: {
+            label: categoryData.label,
+         },
+         withDeleted: true,
+      });
 
-      if (isAlreadyCreated) throw new ConflictException('Category already exists');
+      if (categoryFound)
+         throw new ConflictException('There is already a category with this label.');
 
-      const { ...categoryInfo } = categoryData;
-
-      const newCategory = await this.CategoryRepo.save(categoryInfo);
+      const newCategory = await this.CategoryRepo.save(categoryData);
 
       const category = await this.show(newCategory.id);
 
@@ -48,12 +71,12 @@ export class CategoryService implements BaseCategoryService {
 
       const category = await this.CategoryRepo.findOneBy({ id: categoryId });
 
-      await this.CategoryRepo.save({ id: categoryId, ...category, ...categoryData });
+      await this.CategoryRepo.save({ ...category, ...categoryData });
    }
 
    async delete(categoryId: number) {
       await this.show(categoryId);
 
-      await this.CategoryRepo.delete(categoryId);
+      await this.CategoryRepo.softDelete(categoryId);
    }
 }

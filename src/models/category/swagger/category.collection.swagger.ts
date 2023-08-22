@@ -3,7 +3,7 @@ import type { SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec
 import { successCategoryResourceSchema } from 'src/models/category/swagger/category.resource.swagger';
 
 const successCategoryCollectionSchema: SchemaObject = {
-   description: 'List of pages',
+   description: 'List of categories',
    items: successCategoryResourceSchema,
    type: 'array',
 };

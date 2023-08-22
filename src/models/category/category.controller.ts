@@ -23,6 +23,7 @@ import {
 } from '@nestjs/swagger';
 import { RequestParamsDTO } from 'src/config/dto/request-params.dto';
 import { JwtAuthGuard } from 'src/config/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from 'src/config/guards/optional-jwt.guard';
 import { SwaggerErrorDescriptions } from 'src/config/swagger/error.descriptions.swagger';
 import { swaggerErrorResponse } from 'src/config/swagger/error.response.swagger';
 import { SwaggerSuccessDescriptions } from 'src/config/swagger/success.descriptions.swagger';
@@ -33,6 +34,7 @@ import { successCategoryResourceResponse } from 'src/models/category/swagger/cat
 
 @Controller('categories')
 @ApiTags('Categories')
+@ApiBearerAuth()
 @ApiUnauthorizedResponse({
    description: SwaggerErrorDescriptions.Unauthorized,
    schema: swaggerErrorResponse,
@@ -45,8 +47,7 @@ export class CategoryController {
    constructor(private readonly service: CategoryService) {}
 
    @Get()
-   @UseGuards(JwtAuthGuard)
-   @ApiBearerAuth()
+   @UseGuards(OptionalJwtAuthGuard)
    @ApiOkResponse(successCategoryCollectionResponse)
    async index() {
       const categoryList = await this.service.index();
@@ -54,8 +55,7 @@ export class CategoryController {
    }
 
    @Get(':id')
-   @UseGuards(JwtAuthGuard)
-   @ApiBearerAuth()
+   @UseGuards(OptionalJwtAuthGuard)
    @ApiOkResponse(successCategoryResourceResponse)
    @ApiNotFoundResponse({
       description: SwaggerErrorDescriptions.NotFound,
@@ -69,7 +69,6 @@ export class CategoryController {
 
    @Post()
    @UseGuards(JwtAuthGuard)
-   @ApiBearerAuth()
    @ApiCreatedResponse(successCategoryResourceResponse)
    @ApiBadRequestResponse({
       description: SwaggerErrorDescriptions.BadRequest,
@@ -83,7 +82,6 @@ export class CategoryController {
    @Put(':id')
    @UseGuards(JwtAuthGuard)
    @HttpCode(HttpStatus.NO_CONTENT)
-   @ApiBearerAuth()
    @ApiNoContentResponse({ description: SwaggerSuccessDescriptions.NoContent })
    @ApiBadRequestResponse({
       description: SwaggerErrorDescriptions.BadRequest,
@@ -97,7 +95,6 @@ export class CategoryController {
    @Delete(':id')
    @UseGuards(JwtAuthGuard)
    @HttpCode(HttpStatus.NO_CONTENT)
-   @ApiBearerAuth()
    @ApiNoContentResponse({ description: SwaggerSuccessDescriptions.NoContent })
    async delete(@Param() params: RequestParamsDTO) {
       const { id } = params;

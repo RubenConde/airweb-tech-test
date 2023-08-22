@@ -1,8 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Product } from 'src/models/product/entity/product.entity';
-import { OneToMany } from 'typeorm';
+import { IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateCategoryDTO {
    @IsNotEmpty()
