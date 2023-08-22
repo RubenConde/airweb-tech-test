@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+   ConflictException,
+   ForbiddenException,
+   Injectable,
+   NotFoundException,
+} from '@nestjs/common';
 import { CreateCartDTO, UpdateCartDTO } from 'src/models/cart/dto/cart.dto';
 import { BaseCartService } from 'src/models/cart/interfaces/cart.service.interface';
 import { Cart } from 'src/models/cart/entity/cart.entity';
@@ -19,7 +24,10 @@ export class CartService implements BaseCartService {
 
    async index() {
       const cartList = await this.CartRepo.find({
-         relations: { products: false, user: true, productToCart: true },
+         relations: {
+            productToCart: false,
+            user: false,
+         },
       });
 
       return cartList;
@@ -27,8 +35,13 @@ export class CartService implements BaseCartService {
 
    async show(cartId: number) {
       const foundCart = await this.CartRepo.findOne({
-         where: { id: cartId },
-         select: { id: false, total: true, isFinished: true },
+         relations: {
+            productToCart: false,
+            user: false,
+         },
+         where: {
+            id: cartId,
+         },
       });
 
       if (foundCart === null) throw new NotFoundException(`${Cart.name} not found`);
@@ -44,48 +57,128 @@ export class CartService implements BaseCartService {
       return cart;
    }
 
-   async addProduct(cartId: number, productId: number, requestUser: User | null) {
-      const product = await this.ProductRepo.findOneBy({ id: productId });
-      if (product === null) throw new NotFoundException(`${Product.name} not found`);
+   async addProduct(
+      cartId: number,
+      productId: number,
+      requestUser: User | null,
+      productQuantity = 1,
+   ) {
+      const { cartFound, productFound, userFound, cartToModify, productToCartFound } =
+         await this.verifyProductUpdate(cartId, productId, requestUser);
 
-      const cart = await this.CartRepo.findOneBy({ id: cartId });
-      if (cart === null) throw new NotFoundException(`${Cart.name} not found`);
-      else if (cart.isFinished) throw new ForbiddenException(`${Cart.name} is already done`);
+      let newProductToCart: ProductToCart;
 
-      const userInfo = await this.UserRepo.findOneBy({ email: requestUser?.email });
+      if (productToCartFound)
+         newProductToCart = await this.ProductToCartRepo.save({
+            ...productToCartFound,
+            count: productToCartFound.count + productQuantity,
+         });
+      else
+         newProductToCart = await this.ProductToCartRepo.save({
+            cart: cartFound,
+            product: productFound,
+            count: productQuantity,
+         });
 
-      const productToCart = await this.ProductToCartRepo.save({
-         cart,
-         product,
-         count: 1,
-      });
+      const newProductToCartList = [...cartToModify.productToCart];
+      const productToCartIndex = newProductToCartList.findIndex(
+         (productToCart) =>
+            productToCart.cart === newProductToCart.cart &&
+            productToCart.product === newProductToCart.product,
+      );
 
-      const newProducts = Object.assign([], cart.products);
-      newProducts.push(product);
-
-      const newProductToCart = Object.assign([], cart.productToCart);
-      newProductToCart.push(productToCart);
+      if (productToCartIndex !== -1) newProductToCartList[productToCartIndex] = newProductToCart;
+      else newProductToCartList.push(newProductToCart);
 
       await this.CartRepo.save({
-         ...cart,
-         total: cart.total + product.price,
-         products: newProducts,
-         productToCart: newProductToCart,
-         user: userInfo ?? undefined,
+         ...cartToModify,
+         total: cartToModify.total + productFound.price * productQuantity,
+         productToCart: newProductToCartList,
+         user: userFound ?? undefined,
+      });
+   }
+
+   private async verifyProductUpdate(cartId: number, productId: number, requestUser: User | null) {
+      const cartFound = await this.show(cartId);
+      if (cartFound.isFinished) throw new ForbiddenException(`${Cart.name} has been completed.`);
+
+      const productFound = await this.ProductRepo.findOneBy({ id: productId });
+      if (productFound === null) throw new NotFoundException(`${Product.name} not found.`);
+
+      const userFound = await this.UserRepo.findOneBy({ email: requestUser?.email });
+
+      const cartToModify = (await this.CartRepo.findOne({
+         where: { id: cartFound.id },
+         relations: { productToCart: true },
+      })) as Cart;
+
+      const productToCartDetail = {
+         cart: cartFound,
+         product: productFound,
+      };
+
+      const productToCartFound = await this.ProductToCartRepo.findOne({
+         where: productToCartDetail,
+         relations: { cart: true, product: true },
+      });
+
+      return {
+         cartFound,
+         productFound,
+         userFound,
+         cartToModify,
+         productToCartFound,
+      };
+   }
+
+   async subtractProduct(
+      cartId: number,
+      productId: number,
+      requestUser: User | null,
+      productQuantity = 1,
+   ) {
+      const { productFound, userFound, cartToModify, productToCartFound } =
+         await this.verifyProductUpdate(cartId, productId, requestUser);
+
+      let newProductToCart: ProductToCart;
+      const newProductToCartList: ProductToCart[] = [...cartToModify.productToCart];
+
+      if (productToCartFound)
+         if (productToCartFound.count > productQuantity) {
+            newProductToCart = await this.ProductToCartRepo.save({
+               ...productToCartFound,
+               count: productToCartFound.count - productQuantity,
+            });
+
+            const productToCartIndex = newProductToCartList.findIndex(
+               (productToCart) =>
+                  productToCart.cart === newProductToCart.cart &&
+                  productToCart.product === newProductToCart.product,
+            );
+
+            if (productToCartIndex !== -1)
+               newProductToCartList[productToCartIndex] = newProductToCart;
+            else newProductToCartList.push(newProductToCart);
+         } else if (productToCartFound.count === productQuantity)
+            await this.ProductToCartRepo.delete(productToCartFound);
+         else throw new ConflictException('This action cannot be performed');
+
+      await this.CartRepo.save({
+         ...cartToModify,
+         total:
+            cartToModify.total - (productToCartFound ? productFound.price * productQuantity : 0),
+         productToCart: newProductToCartList,
+         user: userFound ?? undefined,
       });
    }
 
    async checkOut(cartId: number, requestUser: User) {
-      const cart = await this.CartRepo.findOneBy({ id: cartId });
-      if (cart === null) throw new NotFoundException(`${Cart.name} not found`);
-      else if (cart.isFinished) throw new ForbiddenException(`${Cart.name} is already done`);
+      const cart = await this.show(cartId);
 
-      const user = await this.UserRepo.findOneBy({ email: requestUser.email });
-      if (user === null) throw new NotFoundException(`${User.name} not found`);
+      const user = await this.UserRepo.findOneBy({ id: requestUser.id });
+      if (user === null) throw new NotFoundException(`${User.name} not found.`);
 
       await this.CartRepo.save({ ...cart, isFinished: true, user });
-
-      this.store({ isFinished: false, total: 0 });
    }
 
    async update(cartId: number, cartData: UpdateCartDTO) {
@@ -97,6 +190,6 @@ export class CartService implements BaseCartService {
    async delete(cartId: number) {
       await this.show(cartId);
 
-      await this.CartRepo.delete(cartId);
+      await this.CartRepo.softDelete(cartId);
    }
 }

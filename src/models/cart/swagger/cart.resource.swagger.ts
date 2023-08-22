@@ -4,20 +4,16 @@ import type { SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec
 const baseCartInfo = {
    id: {
       description: "Cart's ID",
-      format: 'uuid',
-      type: 'string',
-   },
-   label: {
-      description: "Cart's label",
-      type: 'string',
-   },
-   description: {
-      description: "Cart's description",
-      type: 'string',
-   },
-   index: {
-      description: "Cart's index",
       type: 'integer',
+   },
+   total: {
+      description: "Cart's total",
+      type: 'integer',
+   },
+   isFinished: {
+      description: 'Defines if the cart is finished and no more updates can be made',
+      type: 'boolean',
+      default: false,
    },
 };
 
@@ -27,24 +23,7 @@ export const successCartResourceSchema: SchemaObject = {
    type: 'object',
 };
 
-export const successCartJWTResourceSchema: SchemaObject = {
-   description: "Cart's information",
-   properties: {
-      ...baseCartInfo,
-      accessToken: {
-         description: 'JWT token to perform actions',
-         type: 'string',
-      },
-   },
-   type: 'object',
-};
-
 export const successCartResourceResponse: ApiResponseOptions = {
    description: 'Successful resource data',
    schema: successCartResourceSchema,
-};
-
-export const successCartJWTResourceResponse: ApiResponseOptions = {
-   description: 'Successful resource data',
-   schema: successCartJWTResourceSchema,
 };

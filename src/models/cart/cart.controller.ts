@@ -22,21 +22,24 @@ import {
    ApiTags,
    ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import {
+   CartUpdateProductParamsDTO,
+   CartUpdateProductBodyDTO,
+} from 'src/config/dto/cartUpdateProduct.dto';
 import { RequestParamsDTO } from 'src/config/dto/request-params.dto';
 import { JwtAuthGuard } from 'src/config/guards/jwt-auth.guard';
-
+import { OptionalJwtAuthGuard } from 'src/config/guards/optional-jwt.guard';
 import { SwaggerErrorDescriptions } from 'src/config/swagger/error.descriptions.swagger';
 import { swaggerErrorResponse } from 'src/config/swagger/error.response.swagger';
 import { SwaggerSuccessDescriptions } from 'src/config/swagger/success.descriptions.swagger';
+import { CartService } from 'src/models/cart/cart.service';
 import { CreateCartDTO, UpdateCartDTO } from 'src/models/cart/dto/cart.dto';
 import { successCartCollectionResponse } from 'src/models/cart/swagger/cart.collection.swagger';
 import { successCartResourceResponse } from 'src/models/cart/swagger/cart.resource.swagger';
-import { CartService } from 'src/models/cart/cart.service';
-import { CartAddProductParamsDTO } from 'src/config/dto/cart-add-product.dto';
-import { OptionalJwtAuthGuard } from 'src/config/guards/optional-jwt.guard';
 
 @Controller('carts')
 @ApiTags('Carts')
+@ApiBearerAuth()
 @ApiUnauthorizedResponse({
    description: SwaggerErrorDescriptions.Unauthorized,
    schema: swaggerErrorResponse,
@@ -49,6 +52,7 @@ export class CartController {
    constructor(private readonly service: CartService) {}
 
    @Get()
+   @UseGuards(JwtAuthGuard)
    @ApiOkResponse(successCartCollectionResponse)
    async index() {
       const cartList = await this.service.index();
@@ -56,8 +60,7 @@ export class CartController {
    }
 
    @Get(':id')
-   @UseGuards(JwtAuthGuard)
-   @ApiBearerAuth()
+   @UseGuards(OptionalJwtAuthGuard)
    @ApiOkResponse(successCartResourceResponse)
    @ApiNotFoundResponse({
       description: SwaggerErrorDescriptions.NotFound,
@@ -70,6 +73,7 @@ export class CartController {
    }
 
    @Post()
+   @UseGuards(OptionalJwtAuthGuard)
    @ApiCreatedResponse(successCartResourceResponse)
    @ApiBadRequestResponse({
       description: SwaggerErrorDescriptions.BadRequest,
@@ -88,15 +92,36 @@ export class CartController {
       description: SwaggerErrorDescriptions.BadRequest,
       schema: swaggerErrorResponse,
    })
-   async addProduct(@Param() params: CartAddProductParamsDTO, @Request() request) {
+   async addProduct(
+      @Param() params: CartUpdateProductParamsDTO,
+      @Request() request,
+      @Body() body: CartUpdateProductBodyDTO,
+   ) {
       const { id, productId } = params;
-      const cart = await this.service.addProduct(id, productId, request.user);
+      const cart = await this.service.addProduct(id, productId, request.user, body.quantity);
+      return cart;
+   }
+
+   @Put(':id/subtract/:productId')
+   @UseGuards(OptionalJwtAuthGuard)
+   @HttpCode(HttpStatus.NO_CONTENT)
+   @ApiCreatedResponse(successCartResourceResponse)
+   @ApiBadRequestResponse({
+      description: SwaggerErrorDescriptions.BadRequest,
+      schema: swaggerErrorResponse,
+   })
+   async subtractProduct(
+      @Param() params: CartUpdateProductParamsDTO,
+      @Request() request,
+      @Body() body: CartUpdateProductBodyDTO,
+   ) {
+      const { id, productId } = params;
+      const cart = await this.service.subtractProduct(id, productId, request.user, body.quantity);
       return cart;
    }
 
    @Put(':id/checkout')
    @UseGuards(JwtAuthGuard)
-   @ApiBearerAuth()
    @HttpCode(HttpStatus.NO_CONTENT)
    @ApiCreatedResponse(successCartResourceResponse)
    @ApiBadRequestResponse({
@@ -112,7 +137,6 @@ export class CartController {
    @Put(':id')
    @UseGuards(JwtAuthGuard)
    @HttpCode(HttpStatus.NO_CONTENT)
-   @ApiBearerAuth()
    @ApiNoContentResponse({ description: SwaggerSuccessDescriptions.NoContent })
    @ApiBadRequestResponse({
       description: SwaggerErrorDescriptions.BadRequest,
@@ -126,7 +150,6 @@ export class CartController {
    @Delete(':id')
    @UseGuards(JwtAuthGuard)
    @HttpCode(HttpStatus.NO_CONTENT)
-   @ApiBearerAuth()
    @ApiNoContentResponse({ description: SwaggerSuccessDescriptions.NoContent })
    async delete(@Param() params: RequestParamsDTO) {
       const { id } = params;

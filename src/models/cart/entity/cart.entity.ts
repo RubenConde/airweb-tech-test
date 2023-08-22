@@ -1,5 +1,4 @@
 import { ProductToCart } from 'src/models/cart/entity/productToCart.entity';
-import { Product } from 'src/models/product/entity/product.entity';
 import { User } from 'src/models/user/entity/user.entity';
 import {
    Entity,
@@ -7,9 +6,8 @@ import {
    PrimaryGeneratedColumn,
    ManyToOne,
    JoinColumn,
-   ManyToMany,
-   JoinTable,
    OneToMany,
+   DeleteDateColumn,
 } from 'typeorm';
 
 @Entity({ name: 'carts' })
@@ -27,10 +25,9 @@ export class Cart {
    @JoinColumn({ name: 'user_id' })
    user: User;
 
-   @ManyToMany(() => Product)
-   @JoinTable()
-   products: Product[];
-
    @OneToMany(() => ProductToCart, (productToCart) => productToCart.cart)
    public productToCart: ProductToCart[];
+
+   @DeleteDateColumn({ name: 'deleted_at' })
+   deletedAt: Date;
 }
