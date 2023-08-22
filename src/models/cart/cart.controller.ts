@@ -84,7 +84,7 @@ export class CartController {
       return cart;
    }
 
-   @Put(':id/add/:productId')
+   @Post(':id/product/:productId')
    @UseGuards(OptionalJwtAuthGuard)
    @HttpCode(HttpStatus.NO_CONTENT)
    @ApiCreatedResponse(successCartResourceResponse)
@@ -102,7 +102,7 @@ export class CartController {
       return cart;
    }
 
-   @Put(':id/subtract/:productId')
+   @Delete(':id/product/:productId')
    @UseGuards(OptionalJwtAuthGuard)
    @HttpCode(HttpStatus.NO_CONTENT)
    @ApiCreatedResponse(successCartResourceResponse)
