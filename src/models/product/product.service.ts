@@ -8,12 +8,18 @@ import { User } from 'src/models/user/entity/user.entity';
 
 @Injectable()
 export class ProductService implements BaseProductService {
-   // @ts-ignore: Default constructor value is undefined
    constructor(@InjectRepository(Product) private ProductRepo: Repository<Product>) {}
 
-   async index(requestUser: User | null = null) {
+   async index(requestUser: User | null) {
       const isUserLoggedIn = Boolean(requestUser);
       const productList = await this.ProductRepo.find({
+         select: {
+            description: true,
+            id: true,
+            label: true,
+            price: true,
+            thumbnailUrl: true,
+         },
          where: [
             {
                visibleAuthenticated: isUserLoggedIn,
@@ -22,7 +28,6 @@ export class ProductService implements BaseProductService {
                visiblePublic: !isUserLoggedIn,
             },
          ],
-         select: { id: true, label: true, description: true, price: true, thumbnailUrl: true },
       });
 
       return productList;
@@ -31,23 +36,38 @@ export class ProductService implements BaseProductService {
    async show(productId: number, requestUser: User | null = null) {
       const isUserLoggedIn = Boolean(requestUser);
 
-      const foundProduct = await this.ProductRepo.findOne({
+      const productFound = await this.ProductRepo.findOne({
+         select: {
+            description: true,
+            id: true,
+            label: true,
+            price: true,
+            thumbnailUrl: true,
+         },
          where: [
-            { id: productId, visibleAuthenticated: isUserLoggedIn },
-            { id: productId, visiblePublic: !isUserLoggedIn },
+            {
+               id: productId,
+               visibleAuthenticated: isUserLoggedIn,
+            },
+            {
+               id: productId,
+               visiblePublic: !isUserLoggedIn,
+            },
          ],
-         select: { id: true, label: true, description: true, price: true, thumbnailUrl: true },
       });
 
-      if (foundProduct === null) throw new NotFoundException(`${Product.name} not found`);
+      if (productFound === null) throw new NotFoundException(`${Product.name} not found.`);
 
-      return foundProduct;
+      return productFound;
    }
 
    async store(productData: CreateProductDTO) {
-      const isAlreadyCreated = await this.ProductRepo.findOneBy({ label: productData.label });
+      const productFound = await this.ProductRepo.findOne({
+         where: { label: productData.label },
+         withDeleted: true,
+      });
 
-      if (isAlreadyCreated) throw new ConflictException('Product already exists');
+      if (productFound) throw new ConflictException('Product already exists');
 
       const newProduct = await this.ProductRepo.save(productData);
 
@@ -61,12 +81,12 @@ export class ProductService implements BaseProductService {
 
       const product = await this.ProductRepo.findOneBy({ id: productId });
 
-      await this.ProductRepo.save({ id: productId, ...product, ...productData });
+      await this.ProductRepo.save({ ...product, ...productData });
    }
 
    async delete(productId: number) {
       await this.show(productId);
 
-      await this.ProductRepo.delete(productId);
+      await this.ProductRepo.softDelete(productId);
    }
 }

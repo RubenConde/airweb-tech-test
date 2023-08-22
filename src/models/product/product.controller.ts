@@ -35,6 +35,7 @@ import { ProductService } from 'src/models/product/product.service';
 
 @Controller('products')
 @ApiTags('Products')
+@ApiBearerAuth()
 @ApiUnauthorizedResponse({
    description: SwaggerErrorDescriptions.Unauthorized,
    schema: swaggerErrorResponse,
@@ -48,7 +49,6 @@ export class ProductController {
 
    @Get()
    @UseGuards(OptionalJwtAuthGuard)
-   @ApiBearerAuth()
    @ApiOkResponse(successProductCollectionResponse)
    async index(@Request() request) {
       const productList = await this.service.index(request.user);
@@ -57,7 +57,6 @@ export class ProductController {
 
    @Get(':id')
    @UseGuards(OptionalJwtAuthGuard)
-   @ApiBearerAuth()
    @ApiOkResponse(successProductResourceResponse)
    @ApiNotFoundResponse({
       description: SwaggerErrorDescriptions.NotFound,
@@ -71,7 +70,6 @@ export class ProductController {
 
    @Post()
    @UseGuards(JwtAuthGuard)
-   @ApiBearerAuth()
    @ApiCreatedResponse(successProductResourceResponse)
    @ApiBadRequestResponse({
       description: SwaggerErrorDescriptions.BadRequest,
@@ -85,7 +83,6 @@ export class ProductController {
    @Put(':id')
    @UseGuards(JwtAuthGuard)
    @HttpCode(HttpStatus.NO_CONTENT)
-   @ApiBearerAuth()
    @ApiNoContentResponse({ description: SwaggerSuccessDescriptions.NoContent })
    @ApiBadRequestResponse({
       description: SwaggerErrorDescriptions.BadRequest,
@@ -99,7 +96,6 @@ export class ProductController {
    @Delete(':id')
    @UseGuards(JwtAuthGuard)
    @HttpCode(HttpStatus.NO_CONTENT)
-   @ApiBearerAuth()
    @ApiNoContentResponse({ description: SwaggerSuccessDescriptions.NoContent })
    async delete(@Param() params: RequestParamsDTO) {
       const { id } = params;
