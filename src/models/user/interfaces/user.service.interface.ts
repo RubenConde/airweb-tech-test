@@ -1,6 +1,5 @@
 import { CreateUserDTO, UpdateUserDTO } from 'src/models/user/dto/user.dto';
 import { User } from 'src/models/user/entity/user.entity';
-import { DeleteResult, InsertResult, UpdateResult } from 'typeorm';
 
 export interface BaseUserService {
    /**
@@ -13,9 +12,10 @@ export interface BaseUserService {
    /**
     * Gets the information from a specific user in the database.
     *
-    * It will throw a NotFoundException if no user is found.
+    * It will throw a `NotFoundException` if no user is found.
     *
     * @param {string} userId Identifier of the user to search
+    *
     * @returns {Promise<User>} Information of the user
     */
    show(userId: number): Promise<User>;
@@ -77,6 +77,7 @@ export interface BaseUserService {
     *
     * @param {string} email Email of the user
     * @param {string} password Password of the user
+    *
     * @returns {Promise<User>} Information of the user
     */
    validateUser(email: string, password: string): Promise<User>;

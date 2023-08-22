@@ -22,13 +22,15 @@ export class UserService implements BaseUserService {
 
    async index() {
       const userList = await this.UserRepo.find({
+         relations: {
+            carts: false,
+         },
          select: {
             email: true,
             id: true,
             name: true,
             password: false,
          },
-         relations: { carts: false },
       });
 
       return userList;
@@ -36,14 +38,18 @@ export class UserService implements BaseUserService {
 
    async show(userId: number) {
       const userFound = await this.UserRepo.findOne({
-         where: { id: userId },
+         relations: {
+            carts: false,
+         },
          select: {
             email: true,
             id: true,
             name: true,
             password: false,
          },
-         relations: { carts: false },
+         where: {
+            id: userId,
+         },
       });
       if (userFound === null) throw new NotFoundException(`${User.name} not found.`);
 
@@ -52,7 +58,9 @@ export class UserService implements BaseUserService {
 
    async store(userData: CreateUserDTO, requestUser: User | null) {
       const userFound = await this.UserRepo.findOne({
-         where: { email: userData.email },
+         where: {
+            email: userData.email,
+         },
          withDeleted: true,
       });
       if (userFound) throw new ConflictException('There is already a user with this email.');
